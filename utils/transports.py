@@ -5,7 +5,7 @@ from utils.pburl_decoder import proto_url_encode, proto_url_decode
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from utils.common import register_transport
 from collections import OrderedDict
-from requests import get, post
+from security.safe_requests import get, post
 from functools import reduce
 from re import sub, match
 from json import loads
