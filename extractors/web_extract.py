@@ -13,6 +13,8 @@ from shutil import which
 from time import sleep
 
 from os.path import dirname, realpath
+from security import safe_command
+
 __import__('sys').path.append(dirname(realpath(__file__)) + '/..')
 from utils.transports import GMapsAPIPublic, GMapsAPIPrivate
 from utils.common import register_extractor, extractor_main
@@ -71,7 +73,7 @@ def pburl_extract(url):
         if temp_profile == True:
             cmd += ['--user-data-dir=' + profile, '--no-first-run', '--start-maximized', '--no-default-browser-check']
         
-        chrome = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        chrome = safe_command.run(Popen, cmd, stdout=DEVNULL, stderr=DEVNULL)
 
         try:
             while True:

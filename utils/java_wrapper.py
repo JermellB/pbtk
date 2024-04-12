@@ -9,6 +9,7 @@ from os.path import exists
 
 from extractors.from_binary import walk_binary
 from utils.common import dex2jar, jad
+from security import safe_command
 
 """
     This is a catch-all class that will handle either a JAR, DEX or APK file.
@@ -28,7 +29,7 @@ class JarWrapper(TemporaryDirectory):
         with open(fname, 'rb') as fd:
             if fd.read(4) == b'dex\n':
                 new_jar = self.name + '/classes-dex2jar.jar'
-                run([dex2jar, fname, '-f', '-o', new_jar], cwd=self.name, stderr=DEVNULL)
+                safe_command.run(run, [dex2jar, fname, '-f', '-o', new_jar], cwd=self.name, stderr=DEVNULL)
                 fname = new_jar
     
         with ZipFile(fname) as jar:
@@ -97,7 +98,7 @@ class ClassWrapper:
             jad_args.remove('-af')
             jad_args.insert(1, '-nofd')
         try:
-            run(jad_args, timeout=5, cwd=jar.name, stdout=DEVNULL, stderr=DEVNULL)
+            safe_command.run(run, jad_args, timeout=5, cwd=jar.name, stdout=DEVNULL, stderr=DEVNULL)
         except TimeoutExpired:
             print('(Jad timed out)')
 
