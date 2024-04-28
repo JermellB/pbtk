@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import QTreeWidgetItem, QLineEdit, QCheckBox, QAbstractSpin
 from PyQt5.QtCore import QUrl, Qt, pyqtSignal, QByteArray, QRegExp
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtGui import QRegExpValidator
-
-from xml.dom.minidom import parseString
 from collections import defaultdict
 from subprocess import run, PIPE
 from functools import partial
@@ -18,6 +16,8 @@ from re import match
 
 # Monkey-patch enum value checking,
 from google.protobuf.internal import type_checkers
+import defusedxml.minidom
+
 type_checkers.SupportsOpenEnums = lambda x: True
 
 # Monkey-patch map object creation (suppressing the map_entry option
@@ -69,7 +69,7 @@ class MyFrame(QWebEngineView):
         elif 'kmz' in mime:
             with ZipFile(BytesIO(data)) as fd:
                 if fd.namelist() == ['doc.kml']:
-                    data = parseString(fd.read('doc.kml')).toprettyxml(indent='    ')
+                    data = defusedxml.minidom.parseString(fd.read('doc.kml')).toprettyxml(indent='    ')
                 else:
                     data = '\n'.join(fd.namelist())
         
