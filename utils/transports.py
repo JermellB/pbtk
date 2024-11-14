@@ -5,10 +5,11 @@ from utils.pburl_decoder import proto_url_encode, proto_url_decode
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from utils.common import register_transport
 from collections import OrderedDict
-from requests import get, post
+from requests import post
 from functools import reduce
 from re import sub, match
 from json import loads
+from security import safe_requests
 
 USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'}
 
@@ -68,7 +69,7 @@ class Base64GET():
         url = sub('\{(\w+)\}', lambda i: my_quote(params.pop(i.group(1), '')), self.url)
         if params:
             url += '?' + urlencode(params, safe='~()*!.') # Do not escape '!' for readibility.
-        return get(url, headers=USER_AGENT)
+        return safe_requests.get(url, headers=USER_AGENT)
 
 my_quote = lambda x: quote_plus(str(x), safe='~()*!.')
 
@@ -106,7 +107,7 @@ class GMapsAPIPrivate():
         url = sub('\{(\w+)\}', lambda i: my_quote(params.pop(i.group(1), '')), self.url)
         if params:
             url += '?' + urlencode(params, safe='~()*!.') # Do not escape '!' for readibility.
-        return get(url, headers=USER_AGENT)
+        return safe_requests.get(url, headers=USER_AGENT)
 
 @register_transport(
     name = 'pburl_public',
@@ -151,11 +152,11 @@ class GMapsAPIPublic():
         params = OrderedDict({proto_url_encode(pb_data, '&'): ''})
         params.update(tab_data)
         params['token'] = self.hash_token(urlparse(self.url).path + '?' + self.rebuild_qs(params))
-        return get(self.url + '?' + self.rebuild_qs(params), headers=USER_AGENT)
+        return safe_requests.get(self.url + '?' + self.rebuild_qs(params), headers=USER_AGENT)
     
     def hash_token(self, url):
         if not hasattr(self, 'token'):
-            self.token = get('https://maps.google.com/maps/api/js', headers=USER_AGENT).text
+            self.token = safe_requests.get('https://maps.google.com/maps/api/js', headers=USER_AGENT).text
             self.token = loads(self.token.split('apiLoad(')[1].split(', ')[0])[4][0]
         mask = (1 << 17) - 1
         return reduce(lambda a, b: a * 1729 + ord(b), url, self.token) % mask
