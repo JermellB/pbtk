@@ -17,6 +17,7 @@ from json import dump, load
 from re import findall, sub
 from pathlib import Path
 from shutil import which
+from security import safe_command
 
 # Constructing paths - local data
 
@@ -174,7 +175,7 @@ def load_proto_msgs(proto_path, ret_source_info=False):
         if ret_source_info:
             args += ['-o%s' % (Path(arg_python_out) / 'desc_info'), '--include_source_info', '--include_imports']
         
-        cmd = run(args, stderr=PIPE)
+        cmd = safe_command.run(run, args, stderr=PIPE)
         if cmd.returncode:
             raise ValueError(cmd.stderr.decode('utf8'))
         
