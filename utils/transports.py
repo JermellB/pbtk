@@ -33,7 +33,7 @@ class RawPOST():
         return self.headers
     
     def perform_request(self, pb_data, tab_data):
-        return post(self.url, pb_data.SerializeToString(), headers=self.headers)
+        return post(self.url, pb_data.SerializeToString(), headers=self.headers, timeout=60)
 
 my_quote = lambda x: quote_plus(str(x), safe='~()*!.')
 
@@ -68,7 +68,7 @@ class Base64GET():
         url = sub('\{(\w+)\}', lambda i: my_quote(params.pop(i.group(1), '')), self.url)
         if params:
             url += '?' + urlencode(params, safe='~()*!.') # Do not escape '!' for readibility.
-        return get(url, headers=USER_AGENT)
+        return get(url, headers=USER_AGENT, timeout=60)
 
 my_quote = lambda x: quote_plus(str(x), safe='~()*!.')
 
@@ -106,7 +106,7 @@ class GMapsAPIPrivate():
         url = sub('\{(\w+)\}', lambda i: my_quote(params.pop(i.group(1), '')), self.url)
         if params:
             url += '?' + urlencode(params, safe='~()*!.') # Do not escape '!' for readibility.
-        return get(url, headers=USER_AGENT)
+        return get(url, headers=USER_AGENT, timeout=60)
 
 @register_transport(
     name = 'pburl_public',
@@ -151,11 +151,11 @@ class GMapsAPIPublic():
         params = OrderedDict({proto_url_encode(pb_data, '&'): ''})
         params.update(tab_data)
         params['token'] = self.hash_token(urlparse(self.url).path + '?' + self.rebuild_qs(params))
-        return get(self.url + '?' + self.rebuild_qs(params), headers=USER_AGENT)
+        return get(self.url + '?' + self.rebuild_qs(params), headers=USER_AGENT, timeout=60)
     
     def hash_token(self, url):
         if not hasattr(self, 'token'):
-            self.token = get('https://maps.google.com/maps/api/js', headers=USER_AGENT).text
+            self.token = get('https://maps.google.com/maps/api/js', headers=USER_AGENT, timeout=60).text
             self.token = loads(self.token.split('apiLoad(')[1].split(', ')[0])[4][0]
         mask = (1 << 17) - 1
         return reduce(lambda a, b: a * 1729 + ord(b), url, self.token) % mask
