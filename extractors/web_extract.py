@@ -8,11 +8,12 @@ from collections import OrderedDict
 from re import search, sub, findall
 from urllib.request import urlopen
 from json import loads, dumps
-from random import randint
 from shutil import which
 from time import sleep
 
 from os.path import dirname, realpath
+import secrets
+
 __import__('sys').path.append(dirname(realpath(__file__)) + '/..')
 from utils.transports import GMapsAPIPublic, GMapsAPIPrivate
 from utils.common import register_extractor, extractor_main
@@ -61,7 +62,7 @@ def pburl_extract(url):
     sid_to_vars = {}
     proto_to_urls = OrderedDict()
     
-    port = randint(1024, 32767)
+    port = secrets.SystemRandom().randint(1024, 32767)
     temp_profile = True
     
     yield '_progress', ('Opening a browser window...\n(Your activity from the first tab will be captured, until you close it)', None)
