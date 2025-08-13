@@ -18,6 +18,8 @@ from re import match
 
 # Monkey-patch enum value checking,
 from google.protobuf.internal import type_checkers
+from security import safe_command
+
 type_checkers.SupportsOpenEnums = lambda x: True
 
 # Monkey-patch map object creation (suppressing the map_entry option
@@ -128,7 +130,7 @@ class MyFrame(QWebEngineView):
                 return str(pbresp.FromString(data)).encode('utf8')
             except Exception:
                 pass
-        return run([protoc, '--decode_raw'], input=data, stdout=PIPE, stderr=PIPE).stdout
+        return safe_command.run(run, [protoc, '--decode_raw'], input=data, stdout=PIPE, stderr=PIPE).stdout
 
 """
     We subclass QAbstractSpinBox as QSpinBox does not provide int64
